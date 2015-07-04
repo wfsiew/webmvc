@@ -1,3 +1,1 @@
-/**
- * New node file
- */
+var app = angular.module('webmvc', []);
