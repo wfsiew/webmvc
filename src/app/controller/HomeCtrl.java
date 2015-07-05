@@ -17,9 +17,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import org.apache.log4j.Logger;
+
 @Controller
 public class HomeCtrl
 {
+	private static Logger logger = Logger.getLogger(HomeCtrl.class);
+	
 	@RequestMapping("/users")
 	@ResponseBody
 	public ArrayList<User> getUsers() throws Exception
@@ -48,7 +52,7 @@ public class HomeCtrl
 		
 		catch (Exception ex)
 		{
-			ex.printStackTrace();
+			logger.debug(ex);
 		}
 		
 		finally
@@ -76,8 +80,8 @@ public class HomeCtrl
 	@ResponseBody
 	public Map<String, Object> addUser(@RequestBody User user)
 	{
-		log("id = " + user.getId());
-		log("useremail = " + user.getUserEmail());
+		logger.debug("id = " + user.getId());
+		logger.debug("useremail = " + user.getUserEmail());
 		
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("id", user.getId());
@@ -112,24 +116,19 @@ public class HomeCtrl
 				con = dataSource.getConnection();
 			
 			else
-				log("Failed to lookup datasource.");
+				logger.debug("Failed to lookup datasource.");
 		}
 		
 		catch (NamingException ex)
 		{
-			log("Cannot get connection: " + ex);
+			logger.debug("Cannot get connection: " + ex);
 		}
 		
 		catch (SQLException ex)
 		{
-			log("Cannot get connection: " + ex);
+			logger.debug("Cannot get connection: " + ex);
 		}
 		
 		return con;
-	}
-	
-	private void log(String a)
-	{
-		System.out.println(a);
 	}
 }
