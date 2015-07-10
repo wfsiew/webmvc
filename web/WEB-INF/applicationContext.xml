@@ -13,7 +13,7 @@
     up static resources in the ${webappRoot}/resources/ directory -->
   <mvc:resources location="/static/" mapping="/static/**" />
 
-  <mvc:view-controller path="/" view-name="home" />
+  <!-- <mvc:view-controller path="/" view-name="home" /> -->
 
   <!-- Activates various annotations to be detected in bean classes -->
 
@@ -23,7 +23,7 @@
     as Spring beans. For example @Controller and @Service. Make sure to set the 
     correct base-package -->
 
-  <context:component-scan base-package="app" />
+  <context:component-scan base-package="app.controller" />
 
   <!-- Configures the annotation-driven Spring MVC Controller programming 
     model. Note that, with Spring 3.0, this tag works in Servlet MVC only! -->

@@ -62,7 +62,7 @@ public class HomeCtrl
 		
 		catch (Exception ex)
 		{
-			logger.debug(ex);
+			logger.info(ex);
 		}
 		
 		finally
@@ -108,7 +108,7 @@ public class HomeCtrl
 		
 		catch (Exception ex)
 		{
-			logger.debug(ex);
+			logger.info(ex);
 		}
 		
 		finally
@@ -127,17 +127,24 @@ public class HomeCtrl
 	}
 	
 	@RequestMapping("/home")
-	public ModelAndView home() throws SQLException
+	public ModelAndView home()
 	{
-		return new ModelAndView("home");
+		ModelAndView model = new ModelAndView();
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("success", 1);
+		m.put("msg", "hello");
+		model.addObject("dic", m);
+		model.setViewName("home");
+		
+		return model;
 	}
 	
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> addUser(@RequestBody User user)
 	{
-		logger.debug("id = " + user.getId());
-		logger.debug("useremail = " + user.getUserEmail());
+		//logger.info("id = " + user.getId());
+		//logger.info("useremail = " + user.getUserEmail());
 		
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("id", user.getId());
@@ -216,17 +223,17 @@ public class HomeCtrl
 				con = dataSource.getConnection();
 			
 			else
-				logger.debug("Failed to lookup datasource.");
+				logger.info("Failed to lookup datasource.");
 		}
 		
 		catch (NamingException ex)
 		{
-			logger.debug("Cannot get connection: " + ex);
+			logger.info("Cannot get connection: " + ex);
 		}
 		
 		catch (SQLException ex)
 		{
-			logger.debug("Cannot get connection: " + ex);
+			logger.info("Cannot get connection: " + ex);
 		}
 		
 		return con;

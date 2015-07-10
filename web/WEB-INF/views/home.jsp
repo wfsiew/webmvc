@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" import="java.util.*"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html>
 <html ng-app="webmvc">
@@ -13,6 +13,14 @@
 <body>
 <h1>home</h1>
 <div ng-controller="HomeCtrl">
+  <div>
+  <% 
+  Map<String, Object> m = (HashMap<String, Object>) request.getAttribute("dic");  
+  Set<String> l = m.keySet();
+  for (String k : l) { %>
+  <%= k %>
+  <% } %>
+  </div>
   <form id=form1" novalidate ng-submit="submit()">
     <div>
       <input type="text" ng-model="model.id" placeholder="id" />
