@@ -7,12 +7,16 @@ function HomeCtrl($scope, $http) {
 	
 	$scope.submit = function() {
 		var o = {
-			id: $scope.model.id,
-			userEmail: $scope.model.useremail
+			age: $scope.model.age,
+			name: $scope.model.name
 		};
 		
-		$http.post('/webmvc/add', o).success(function(data) {
-			alert(data.id + ", " + data.useremail);
+		var cfg = utils.csrfHeader();
+		
+		$http.post('/webmvc/add/person', o, cfg).success(function(data) {
+			for (var i in data) {
+				alert(i);
+			}
 		});
 	}
 }

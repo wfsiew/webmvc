@@ -4,6 +4,7 @@ import app.models.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.sql.*;
 import java.io.BufferedReader;
@@ -14,11 +15,20 @@ import java.net.HttpURLConnection;
 import java.net.URL;
  
 
+
+
+
+
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.naming.*;
 import javax.sql.*;
+import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -137,6 +147,30 @@ public class HomeCtrl
 		model.setViewName("home");
 		
 		return model;
+	}
+	
+	@RequestMapping(value = "/add/person", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> addPerson(@RequestBody @Valid Person person, BindingResult res)
+	{
+		Map<String, Object> m = new HashMap<String, Object>();
+		
+		if (res.hasErrors())
+		{
+			List<FieldError> l = res.getFieldError();
+			for (FieldError o : l)
+			{
+				
+			}
+		}
+		
+		else
+		{
+			m.put("age", person.getAge());
+			m.put("name", person.getName());
+		}
+		
+		return m;
 	}
 	
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
