@@ -157,10 +157,10 @@ public class HomeCtrl
 		
 		if (res.hasErrors())
 		{
-			List<FieldError> l = res.getFieldError();
+			List<FieldError> l = res.getFieldErrors();
 			for (FieldError o : l)
 			{
-				
+				m.put(o.getField(), o.getDefaultMessage());
 			}
 		}
 		

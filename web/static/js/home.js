@@ -15,7 +15,7 @@ function HomeCtrl($scope, $http) {
 		
 		$http.post('/webmvc/add/person', o, cfg).success(function(data) {
 			for (var i in data) {
-				alert(i);
+				alert(i + ' ' + data[i]);
 			}
 		});
 	}
