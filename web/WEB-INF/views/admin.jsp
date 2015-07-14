@@ -16,12 +16,12 @@
 		}
 	</script>
 
-	<c:if test="${pageContext.request.userPrincipal.name != null}">
+  <% if (request.getUserPrincipal().getName() != null) { %>
 		<h2>
-			Welcome : ${pageContext.request.userPrincipal.name} | <a
+			Welcome : <%= request.getUserPrincipal().getName() %> | <a
 				href="javascript:formSubmit()"> Logout</a>
 		</h2>
-	</c:if>
+	<% } %>
 
 </body>
 </html>
