@@ -11,10 +11,8 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
  
-
 
 
 
@@ -28,7 +26,6 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -36,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.apache.log4j.Logger;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 public class HomeCtrl
@@ -199,27 +199,39 @@ public class HomeCtrl
 	}
 	
 	@RequestMapping("/callback")
-	public Map<String, Object> callback(@RequestParam("code") String code, 
-			                            @RequestParam("session_state") String sessionState) throws IOException
+	public ModelAndView callback(@RequestParam("code") String code, 
+			                                @RequestParam("session_state") String sessionState) throws IOException
 	{
-		Map<String, Object> m = new HashMap<String, Object>();
-		m.put("success", 1);
-		
 		String url = "https://www.googleapis.com/oauth2/v3/token";
+		
 		URL obj = new URL(url);
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-		
+ 
+		//add request header
 		con.setRequestMethod("POST");
+		con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+		con.setRequestProperty("charset", "utf-8");
+		con.setRequestProperty("User-Agent", "Mozilla/5.0");
+		con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 		
-		String urlParameters = "code=" + code + "&client_id=67995890535.apps.googleusercontent.com&client_secret=MTnxddiDsRnuLJY6Rp9uCoo7&redirect_uri=http://localhost:8080/webmvc/callback2&grant_type=authorization_code";
+		StringBuffer sb = new StringBuffer();
+		sb.append("code=" + code)
+		.append("&client_id=767995890535.apps.googleusercontent.com")
+		.append("&client_secret=MTnxddiDsRnuLJY6Rp9uCoo7")
+		.append("&redirect_uri=http://localhost/webmvc/callback")
+		.append("&grant_type=authorization_code");
+ 
+		String urlParameters = sb.toString();
+		
+		// Send post request
 		con.setDoOutput(true);
 		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
 		wr.writeBytes(urlParameters);
 		wr.flush();
 		wr.close();
-		
+ 
 		int responseCode = con.getResponseCode();
-		
+ 
 		BufferedReader in = new BufferedReader(
 		        new InputStreamReader(con.getInputStream()));
 		String inputLine;
@@ -230,16 +242,46 @@ public class HomeCtrl
 		}
 		in.close();
 		
-		m.put("response", response.toString());
+		ObjectMapper m = new ObjectMapper();
+		HashMap<String, Object> h = m.readValue(response.toString(), HashMap.class);
 		
-		return m;
-	}
-	
-	@RequestMapping("/callback2")
-	@ResponseBody
-	public String callback2()
-	{
-		return "success";
+		url = "https://www.googleapis.com/plus/v1/people/me?access_token=" + h.get("access_token");
+		
+		obj = new URL(url);
+		
+		con = (HttpsURLConnection) obj.openConnection();
+		
+		// optional default is GET
+		con.setRequestMethod("GET");
+
+		// add request header
+		con.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+		responseCode = con.getResponseCode();
+		
+		in = new BufferedReader(
+		        new InputStreamReader(con.getInputStream()));
+		inputLine = null;
+		response = new StringBuffer();
+ 
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+		
+		h = m.readValue(response.toString(), HashMap.class);
+		
+		ModelAndView model = new ModelAndView();
+		HashMap<String, Object> image = (HashMap<String, Object>) h.get("image");
+		HashMap<String, Object> name = (HashMap<String, Object>) h.get("name");
+		ArrayList<HashMap<String, Object>> emails = (ArrayList<HashMap<String, Object>>) h.get("emails");
+		
+		model.addObject("image", image.get("url"));
+		model.addObject("email", emails.get(0).get("value"));
+		model.addObject("name", name.get("givenName").toString() + name.get("familyName").toString());
+		model.setViewName("callback");
+		
+		return model;
 	}
 	
 	private Connection getConnection(String ds)

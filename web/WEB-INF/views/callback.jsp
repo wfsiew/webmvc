@@ -7,7 +7,8 @@
 <title>Insert title here</title>
 </head>
 <body>
-<h1>Index</h1>
-<a href="https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=767995890535.apps.googleusercontent.com&redirect_uri=http://localhost/webmvc/callback&scope=openid%20profile%20email&login_hint=email">Login</a>
+<img alt="" src="<%= request.getAttribute("image") %>">
+<div><%= request.getAttribute("email") %></div>
+<div><%= request.getAttribute("name") %></div>
 </body>
 </html>

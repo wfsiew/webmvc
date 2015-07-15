@@ -8,11 +8,12 @@
 <!-- default header name is X-CSRF-TOKEN -->
 <meta name="_csrf_header" content="${_csrf.headerName}"/>
 <title>Insert title here</title>
-<script type="text/javascript" src="/webmvc/static/js/jquery-1.11.2.min.js"></script>
-<script type="text/javascript" src="/webmvc/static/js/angular.min.js"></script>
-<script type="text/javascript" src="/webmvc/static/js/app.js"></script>
-<script type="text/javascript" src="/webmvc/static/js/utils.js"></script>
-<script type="text/javascript" src="/webmvc/static/js/home.js"></script>
+<% String path = request.getContextPath(); %>
+<script type="text/javascript" src="<%= path %>/static/js/jquery-1.11.2.min.js"></script>
+<script type="text/javascript" src="<%= path %>/static/js/angular.min.js"></script>
+<script type="text/javascript" src="<%= path %>/static/js/app.js"></script>
+<script type="text/javascript" src="<%= path %>/static/js/utils.js"></script>
+<script type="text/javascript" src="<%= path %>/static/js/home.js"></script>
 </head>
 <body>
 <h1>home</h1>
