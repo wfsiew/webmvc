@@ -2,10 +2,14 @@ package app.controller;
 
 import app.models.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -14,6 +18,9 @@ import javax.naming.*;
 import javax.sql.*;
 import javax.validation.Valid;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -36,7 +43,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
-public class HomeCtrl
+public class HomeCtrl extends AppCtrl
 {
 	private static Logger logger = Logger.getLogger(HomeCtrl.class);;
 	
@@ -166,6 +173,10 @@ public class HomeCtrl
 		{
 			m.put("age", person.getAge());
 			m.put("name", person.getName());
+			
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MMM-dd");
+			String dt = df.format(person.getDob());
+			m.put("dob", dt);
 		}
 		
 		return m;
@@ -210,6 +221,34 @@ public class HomeCtrl
 		model.setViewName("callback");
 		
 		return model;
+	}
+	
+	@RequestMapping("/file")
+	public HttpEntity<byte[]> getFile()
+	{
+		String p = "C:\\nginx-1.9.2\\conf\\nginx.conf";
+		HttpEntity<byte[]> o = null;
+		
+		try
+		{
+			Path file = Paths.get(p);
+			byte[] b = Files.readAllBytes(file);
+			
+			HttpHeaders header = new HttpHeaders();
+		    header.setContentType(new MediaType("application", "text"));
+		    header.set("Content-Disposition",
+		    		"attachment; filename=abc.txt");
+		    header.setContentLength(b.length);
+
+		    o = new HttpEntity<byte[]>(b, header);
+		}
+		
+		catch (Exception ex)
+		{
+			logger.error(ex);
+		}
+		
+		return o;
 	}
 	
 	private Connection getConnection(String ds)

@@ -1,5 +1,7 @@
 package app.models;
 
+import java.sql.Date;
+
 import javax.validation.constraints.*;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -12,6 +14,8 @@ public class Person {
 	
 	@Min(1)
 	private int age;
+	
+	private Date dob;
 
 	public String getName() {
 		return name;
@@ -27,5 +31,13 @@ public class Person {
 
 	public void setAge(int age) {
 		this.age = age;
+	}
+
+	public Date getDob() {
+		return dob;
+	}
+
+	public void setDob(Date dob) {
+		this.dob = dob;
 	}
 }

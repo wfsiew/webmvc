@@ -8,7 +8,8 @@ function HomeCtrl($scope, $http) {
 	$scope.submit = function() {
 		var o = {
 			age: $scope.model.age,
-			name: $scope.model.name
+			name: $scope.model.name,
+			dob: '2015-07-01'
 		};
 		
 		var cfg = utils.csrfHeader();
