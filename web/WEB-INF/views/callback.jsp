@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+    pageEncoding="ISO-8859-1"
+    import="app.models.*"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,8 +8,13 @@
 <title>Insert title here</title>
 </head>
 <body>
-<img alt="" src="<%= request.getAttribute("image") %>">
-<div><%= request.getAttribute("email") %></div>
-<div><%= request.getAttribute("name") %></div>
+<% GoogleProfile g = (GoogleProfile) request.getAttribute("profile"); %>
+<img alt="" src="<%= g.image.url %>">
+<ul>
+<% for (GoogleEmail x : g.emails) { %>
+<li><%= x.value %>
+<% } %>
+</ul>
+<h1><%= g.displayName %></h1>
 </body>
 </html>

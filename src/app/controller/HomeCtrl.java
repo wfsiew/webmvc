@@ -8,17 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.sql.*;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
- 
 
-
-
-
-
-import javax.net.ssl.HttpsURLConnection;
 import javax.naming.*;
 import javax.sql.*;
 import javax.validation.Valid;
@@ -32,9 +23,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
@@ -72,7 +70,7 @@ public class HomeCtrl
 		
 		catch (Exception ex)
 		{
-			logger.info(ex);
+			logger.error(ex);
 		}
 		
 		finally
@@ -118,7 +116,7 @@ public class HomeCtrl
 		
 		catch (Exception ex)
 		{
-			logger.info(ex);
+			logger.error(ex);
 		}
 		
 		finally
@@ -199,86 +197,16 @@ public class HomeCtrl
 	}
 	
 	@RequestMapping("/callback")
+	@ResponseBody
 	public ModelAndView callback(@RequestParam("code") String code, 
-			                                @RequestParam("session_state") String sessionState) throws IOException
+			                     @RequestParam("session_state") String sessionState)
 	{
-		String url = "https://www.googleapis.com/oauth2/v3/token";
-		
-		URL obj = new URL(url);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
- 
-		//add request header
-		con.setRequestMethod("POST");
-		con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-		con.setRequestProperty("charset", "utf-8");
-		con.setRequestProperty("User-Agent", "Mozilla/5.0");
-		con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-		
-		StringBuffer sb = new StringBuffer();
-		sb.append("code=" + code)
-		.append("&client_id=767995890535.apps.googleusercontent.com")
-		.append("&client_secret=MTnxddiDsRnuLJY6Rp9uCoo7")
-		.append("&redirect_uri=http://localhost/webmvc/callback")
-		.append("&grant_type=authorization_code");
- 
-		String urlParameters = sb.toString();
-		
-		// Send post request
-		con.setDoOutput(true);
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(urlParameters);
-		wr.flush();
-		wr.close();
- 
-		int responseCode = con.getResponseCode();
- 
-		BufferedReader in = new BufferedReader(
-		        new InputStreamReader(con.getInputStream()));
-		String inputLine;
-		StringBuffer response = new StringBuffer();
- 
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-		
-		ObjectMapper m = new ObjectMapper();
-		HashMap<String, Object> h = m.readValue(response.toString(), HashMap.class);
-		
-		url = "https://www.googleapis.com/plus/v1/people/me?access_token=" + h.get("access_token");
-		
-		obj = new URL(url);
-		
-		con = (HttpsURLConnection) obj.openConnection();
-		
-		// optional default is GET
-		con.setRequestMethod("GET");
-
-		// add request header
-		con.setRequestProperty("User-Agent", "Mozilla/5.0");
-
-		responseCode = con.getResponseCode();
-		
-		in = new BufferedReader(
-		        new InputStreamReader(con.getInputStream()));
-		inputLine = null;
-		response = new StringBuffer();
- 
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-		
-		h = m.readValue(response.toString(), HashMap.class);
+		HashMap<String, Object> h = getAccessToken(code);
+		GoogleProfile g = getProfile(h);
 		
 		ModelAndView model = new ModelAndView();
-		HashMap<String, Object> image = (HashMap<String, Object>) h.get("image");
-		HashMap<String, Object> name = (HashMap<String, Object>) h.get("name");
-		ArrayList<HashMap<String, Object>> emails = (ArrayList<HashMap<String, Object>>) h.get("emails");
 		
-		model.addObject("image", image.get("url"));
-		model.addObject("email", emails.get(0).get("value"));
-		model.addObject("name", name.get("givenName").toString() + name.get("familyName").toString());
+		model.addObject("profile", g);
 		model.setViewName("callback");
 		
 		return model;
@@ -304,14 +232,96 @@ public class HomeCtrl
 		
 		catch (NamingException ex)
 		{
-			logger.info("Cannot get connection: " + ex);
+			logger.error("Cannot get connection: " + ex);
 		}
 		
 		catch (SQLException ex)
 		{
-			logger.info("Cannot get connection: " + ex);
+			logger.error("Cannot get connection: " + ex);
 		}
 		
 		return con;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private HashMap<String, Object> getAccessToken(String code)
+	{
+		HashMap<String, Object> h = new HashMap<String, Object>();
+		
+		try
+		{
+			String url = "https://www.googleapis.com/oauth2/v3/token";
+			
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost(url);
+			
+			post.setHeader("User-Agent", "Mozilla/5.0");
+			
+			List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+			urlParameters.add(new BasicNameValuePair("code", code));
+			urlParameters.add(new BasicNameValuePair("client_id", "767995890535.apps.googleusercontent.com"));
+			urlParameters.add(new BasicNameValuePair("client_secret", "MTnxddiDsRnuLJY6Rp9uCoo7"));
+			urlParameters.add(new BasicNameValuePair("redirect_uri", "http://localhost/webmvc/callback"));
+			urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
+			
+			post.setEntity(new UrlEncodedFormEntity(urlParameters));
+			
+			HttpResponse response = client.execute(post);
+			
+			BufferedReader rd = new BufferedReader(
+					new InputStreamReader(response.getEntity().getContent()));
+
+			StringBuffer result = new StringBuffer();
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+			
+			ObjectMapper m = new ObjectMapper();
+			h = m.readValue(result.toString(), HashMap.class);
+		}
+		
+		catch (Exception ex)
+		{
+			logger.error(ex);
+		}
+		
+		return h;
+	}
+	
+	private GoogleProfile getProfile(HashMap<String, Object> h)
+	{
+		GoogleProfile g = null;
+		
+		try
+		{
+			String url = "https://www.googleapis.com/plus/v1/people/me?access_token=" + h.get("access_token");
+			
+			HttpClient client = new DefaultHttpClient();
+			HttpGet req = new HttpGet(url);
+			
+			req.addHeader("User-Agent", "Mozilla/5.0");
+			 
+			HttpResponse response = client.execute(req);
+			
+			BufferedReader rd = new BufferedReader(
+	                new InputStreamReader(response.getEntity().getContent()));
+
+			StringBuffer result = new StringBuffer();
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+			
+			ObjectMapper m = new ObjectMapper();
+			g = m.readValue(result.toString(), GoogleProfile.class);
+		}
+		
+		catch (Exception ex)
+		{
+			logger.error(ex);
+		}
+		
+		return g;
 	}
 }
