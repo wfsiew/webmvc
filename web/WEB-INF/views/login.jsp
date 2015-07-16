@@ -67,6 +67,8 @@
 						value="submit" /></td>
 				</tr>
 			</table>
+            
+      <a href="<%= request.getAttribute("uri") %>">Login</a>
 
 			<input type="hidden" name="${_csrf.parameterName}"
 				value="${_csrf.token}" />

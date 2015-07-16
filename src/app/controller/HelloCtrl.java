@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,13 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-
-import sun.net.www.content.audio.x_aiff;
-import sun.text.normalizer.ICUBinary.Authenticate;
-
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-import com.sun.javafx.collections.MappingChange.Map;
-import com.sun.mail.handlers.message_rfc822;
 
 @Controller
 public class HelloCtrl {
@@ -35,6 +30,7 @@ public class HelloCtrl {
 		return model;
 	}
 	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@RequestMapping(value = "/admin**", method = RequestMethod.GET)
 	public ModelAndView adminPage() {
 
@@ -58,6 +54,16 @@ public class HelloCtrl {
 		if (logout != null) {
 			model.addObject("msg", "You've been logged out successfully.");
 		}
+		
+		StringBuffer sb = new StringBuffer("https://accounts.google.com/o/oauth2/auth");
+		sb.append("?response_type=code")
+		.append("&client_id=767995890535.apps.googleusercontent.com")
+		.append("&redirect_uri=http://localhost/webmvc/callback")
+		.append("&scope=openid%20profile%20email")
+		.append("&login_hint=email");
+		
+		model.addObject("uri", sb.toString());
+		
 		model.setViewName("login");
 
 		return model;
@@ -70,10 +76,14 @@ public class HelloCtrl {
 		
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Collection<? extends GrantedAuthority> c = authentication.getAuthorities();
+		ArrayList<String> l = new ArrayList<String>();
 		
 		for (GrantedAuthority o : c) {
-			m.put(authentication.getName(), o.getAuthority());
+			l.add(o.getAuthority());
 		}
+		
+		String roles = String.join(",", l);
+		m.put(authentication.getName(), roles);
 		
 		return m;
 	}

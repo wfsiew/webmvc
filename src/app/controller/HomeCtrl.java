@@ -1,6 +1,7 @@
 package app.controller;
 
 import app.models.*;
+import app.services.GoogleUserDetailsService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,12 +16,14 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import javax.naming.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.sql.*;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -43,6 +47,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
+@SessionAttributes("googleEmail")
 public class HomeCtrl extends AppCtrl
 {
 	private static Logger logger = Logger.getLogger(HomeCtrl.class);;
@@ -210,15 +215,34 @@ public class HomeCtrl extends AppCtrl
 	@RequestMapping("/callback")
 	@ResponseBody
 	public ModelAndView callback(@RequestParam("code") String code, 
-			                     @RequestParam("session_state") String sessionState)
+			                     @RequestParam("session_state") String sessionState,
+			                     HttpServletRequest req)
 	{
 		HashMap<String, Object> h = getAccessToken(code);
 		GoogleProfile g = getProfile(h);
-		
 		ModelAndView model = new ModelAndView();
+		
+		if (g.emails.length > 0)
+		{
+			String email = g.emails[0].value;
+			model.addObject("googleEmail", email);
+			
+			model.setViewName("redirect:googlelogin");
+			
+			return model;
+		}
 		
 		model.addObject("profile", g);
 		model.setViewName("callback");
+		
+		return model;
+	}
+	
+	@RequestMapping("/googlelogin")
+	public ModelAndView googleLogin()
+	{
+		ModelAndView model = new ModelAndView();
+		model.setViewName("googlelogin");
 		
 		return model;
 	}

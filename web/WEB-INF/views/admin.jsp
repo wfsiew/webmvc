@@ -16,7 +16,8 @@
 		}
 	</script>
 
-  <% if (request.getUserPrincipal().getName() != null) { %>
+  <% if (request.getUserPrincipal() != null &&
+         request.getUserPrincipal().getName() != null) { %>
 		<h2>
 			Welcome : <%= request.getUserPrincipal().getName() %> | <a
 				href="javascript:formSubmit()"> Logout</a>

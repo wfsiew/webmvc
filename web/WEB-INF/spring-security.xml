@@ -6,10 +6,12 @@
                                  http://www.springframework.org/schema/security
                                  http://www.springframework.org/schema/security/spring-security-4.0.xsd">
   
+  <global-method-security pre-post-annotations="enabled" secured-annotations="enabled" />
+  
   <http auto-config="true" 
         use-expressions="false"
         disable-url-rewriting="true">
-    <intercept-url pattern="/admin**" access="ROLE_USER" />
+<!--     <intercept-url pattern="/admin**" access="ROLE_USER" /> -->
     <intercept-url pattern="/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
     <form-login login-page="/login"
                 username-parameter="username"
@@ -24,9 +26,11 @@
   </http>
   
   <authentication-manager>
-    <authentication-provider ref="customAuthenticationProvider">
-    </authentication-provider>
+    <authentication-provider user-service-ref="googleUserDetailsService"></authentication-provider>
+<!--     <authentication-provider ref="customAuthenticationProvider"> -->
+<!--     </authentication-provider> -->
   </authentication-manager>
   
-  <beans:bean id="customAuthenticationProvider" class="app.models.CustomAuthenticationProvider" />
+  <beans:bean id="googleUserDetailsService" class="app.services.GoogleUserDetailsService"></beans:bean>
+<!--   <beans:bean id="customAuthenticationProvider" class="app.services.CustomAuthenticationProvider" /> -->
 </beans:beans>
