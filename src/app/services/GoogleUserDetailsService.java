@@ -14,8 +14,8 @@ public class GoogleUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username)
 			throws UsernameNotFoundException {
-		if (username != "wingfei.siew@redtone.com") {
-			Collection<? extends GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN","role2","role3");
+		if ("wingfei.siew@redtone.com".equals(username)) {
+			Collection<? extends GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("role1","role2","role3");
 		    return new User(username, "###", authorities);
 		}
 		

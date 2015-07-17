@@ -5,7 +5,7 @@
 <head>
 <title>Login Page</title>
 </head>
-<body>
+<body onload="document.loginForm.submit();">
 
 	<div id="login-box">
 
@@ -28,12 +28,6 @@
 					<td>Password:</td>
 					<td><input type='password' name='password' value="###" /></td>
 				</tr>
-				<tr>
-					<td colspan='2'>
-            <input name="submit" type="submit"
-						       value="submit" />
-          </td>
-				</tr>
 			</table>
 
 			<input type="hidden" name="${_csrf.parameterName}"
@@ -41,12 +35,5 @@
 
 		</form>
 	</div>
-  <script type="text/javascript">
-  function submit() {
-	  document.loginForm.submit();
-  }
-
-  submit();
-  </script>
 </body>
 </html>
