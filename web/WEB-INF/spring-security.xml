@@ -24,11 +24,10 @@
   </http>
   
   <authentication-manager>
-    <authentication-provider user-service-ref="googleUserDetailsService"></authentication-provider>
-<!--     <authentication-provider ref="customAuthenticationProvider"> -->
-<!--     </authentication-provider> -->
+<!--     <authentication-provider user-service-ref="googleUserDetailsService"></authentication-provider> -->
+    <authentication-provider ref="customAuthenticationProvider" />
   </authentication-manager>
   
-  <beans:bean id="googleUserDetailsService" class="app.services.GoogleUserDetailsService"></beans:bean>
-<!--   <beans:bean id="customAuthenticationProvider" class="app.services.CustomAuthenticationProvider" /> -->
+<!--   <beans:bean id="googleUserDetailsService" class="app.services.GoogleUserDetailsService"></beans:bean> -->
+  <beans:bean id="customAuthenticationProvider" class="app.services.CustomAuthenticationProvider" />
 </beans:beans>

@@ -1,56 +1,50 @@
 package app.controller;
 
 import app.models.*;
-import app.services.GoogleUserDetailsService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import javax.naming.*;
-import javax.servlet.http.HttpServletRequest;
 import javax.sql.*;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @Controller
 @SessionAttributes("googleEmail")
 public class HomeCtrl extends AppCtrl
 {
-	private static Logger logger = Logger.getLogger(HomeCtrl.class);;
+	private static Logger logger = Logger.getLogger(HomeCtrl.class);
 	
 	private final String ds1 = "java:/MSSQLDS";
 	private final String ds2 = "java:/MSSQLDS-120";
@@ -212,39 +206,61 @@ public class HomeCtrl extends AppCtrl
 		return m;
 	}
 	
-	@RequestMapping("/callback")
-	@ResponseBody
-	public ModelAndView callback(@RequestParam("code") String code, 
-			                     @RequestParam("session_state") String sessionState,
-			                     HttpServletRequest req)
+	@RequestMapping("/excelfile")
+	public HttpEntity<byte[]> getExcelFile()
 	{
-		HashMap<String, Object> h = getAccessToken(code);
-		GoogleProfile g = getProfile(h);
-		ModelAndView model = new ModelAndView();
+		HttpEntity<byte[]> o = null;
 		
-		if (g.emails.length > 0)
+		try
 		{
-			String email = g.emails[0].value;
-			model.addObject("googleEmail", email);
+			Workbook wb = new XSSFWorkbook();
+			Sheet sheet = wb.createSheet("new");
 			
-			model.setViewName("redirect:googlelogin");
+			DataFormat format = wb.createDataFormat();
+			short x = format.getFormat("#,##0.00000");
 			
-			return model;
+			Row row = sheet.createRow(0);
+			
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setDataFormat(x);
+			
+			Cell c = row.createCell(0);
+			c.setCellStyle(cellStyle);
+			c.setCellValue(12345678.12345);
+			
+			row.createCell(1).setCellValue("Hello");
+			
+			CreationHelper createHelper = wb.getCreationHelper();
+			cellStyle = wb.createCellStyle();
+		    cellStyle.setDataFormat(
+		        createHelper.createDataFormat().getFormat("yyyy-mm-dd"));
+			
+			c = row.createCell(2);
+			c.setCellStyle(cellStyle);
+			c.setCellValue(Calendar.getInstance());
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			wb.write(bos);
+			byte[] b = bos.toByteArray();
+			bos.close();
+			
+			wb.close();
+			
+			HttpHeaders header = new HttpHeaders();
+		    header.setContentType(new MediaType("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+		    header.set("Content-Disposition",
+		    		"attachment; filename=testexcel.xlsx");
+		    header.setContentLength(b.length);
+
+		    o = new HttpEntity<byte[]>(b, header);
 		}
 		
-		model.addObject("profile", g);
-		model.setViewName("callback");
+		catch (Exception ex)
+		{
+			logger.error(ex);
+		}
 		
-		return model;
-	}
-	
-	@RequestMapping("/googlelogin")
-	public ModelAndView googleLogin()
-	{
-		ModelAndView model = new ModelAndView();
-		model.setViewName("googlelogin");
-		
-		return model;
+		return o;
 	}
 	
 	@RequestMapping("/file")
@@ -304,87 +320,5 @@ public class HomeCtrl extends AppCtrl
 		}
 		
 		return con;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private HashMap<String, Object> getAccessToken(String code)
-	{
-		HashMap<String, Object> h = new HashMap<String, Object>();
-		
-		try
-		{
-			String url = "https://www.googleapis.com/oauth2/v3/token";
-			
-			HttpClient client = new DefaultHttpClient();
-			HttpPost post = new HttpPost(url);
-			
-			post.setHeader("User-Agent", "Mozilla/5.0");
-			
-			List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-			urlParameters.add(new BasicNameValuePair("code", code));
-			urlParameters.add(new BasicNameValuePair("client_id", "767995890535.apps.googleusercontent.com"));
-			urlParameters.add(new BasicNameValuePair("client_secret", "MTnxddiDsRnuLJY6Rp9uCoo7"));
-			urlParameters.add(new BasicNameValuePair("redirect_uri", "http://localhost/webmvc/callback"));
-			urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
-			
-			post.setEntity(new UrlEncodedFormEntity(urlParameters));
-			
-			HttpResponse response = client.execute(post);
-			
-			BufferedReader rd = new BufferedReader(
-					new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuffer result = new StringBuffer();
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
-			}
-			
-			ObjectMapper m = new ObjectMapper();
-			h = m.readValue(result.toString(), HashMap.class);
-		}
-		
-		catch (Exception ex)
-		{
-			logger.error(ex);
-		}
-		
-		return h;
-	}
-	
-	private GoogleProfile getProfile(HashMap<String, Object> h)
-	{
-		GoogleProfile g = null;
-		
-		try
-		{
-			String url = "https://www.googleapis.com/plus/v1/people/me?access_token=" + h.get("access_token");
-			
-			HttpClient client = new DefaultHttpClient();
-			HttpGet req = new HttpGet(url);
-			
-			req.addHeader("User-Agent", "Mozilla/5.0");
-			 
-			HttpResponse response = client.execute(req);
-			
-			BufferedReader rd = new BufferedReader(
-	                new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuffer result = new StringBuffer();
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
-			}
-			
-			ObjectMapper m = new ObjectMapper();
-			g = m.readValue(result.toString(), GoogleProfile.class);
-		}
-		
-		catch (Exception ex)
-		{
-			logger.error(ex);
-		}
-		
-		return g;
 	}
 }
