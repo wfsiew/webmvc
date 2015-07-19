@@ -239,6 +239,10 @@ public class HomeCtrl extends AppCtrl
 			c.setCellStyle(cellStyle);
 			c.setCellValue(Calendar.getInstance());
 			
+			sheet.autoSizeColumn(0);
+			sheet.autoSizeColumn(1);
+			sheet.autoSizeColumn(2);
+			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			wb.write(bos);
 			byte[] b = bos.toByteArray();
