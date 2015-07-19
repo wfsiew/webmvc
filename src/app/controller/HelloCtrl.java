@@ -132,6 +132,7 @@ public class HelloCtrl {
 		return model;
 	}
 	
+	@PreAuthorize("hasAuthority('ROLE_ANONYMOUS')")
 	@RequestMapping(value = "/auth", method = RequestMethod.GET)
 	@ResponseBody
 	public HashMap<String, Object> auth() {
