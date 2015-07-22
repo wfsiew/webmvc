@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html ng-app="webmvc">
+<head>
+<meta charset="UTF-8" />
+<div th:replace="_layout :: meta"></div>
+<title>Insert title here</title>
+<div th:replace="_layout :: script"></div>
+</head>
+<body>
+<h1>home</h1>
+<div ng-controller="HomeCtrl">
+  <div>
+  <th:block th:each="k : ${dic.keySet()}">
+  <th:block th:text="${k}"></th:block>
+  </th:block>
+  </div>
+  <form id="form1" novalidate="novalidate" ng-submit="submit()">
+    <div>
+      <input type="text" ng-model="model.age" placeholder="age" />
+    </div>
+    <div>
+      <input type="text" ng-model="model.name" placeholder="name" />
+    </div>
+    <div>
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+</div>
+</body>
+</html>
