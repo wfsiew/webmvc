@@ -6,12 +6,12 @@
 <meta name="_csrf" th:content="${_csrf.token}"/>
 <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </th:block>
-<th:block th:fragment="script">
-<script type="text/javascript" th:src="|${#httpServletRequest.getContextPath()}/static/js/jquery-1.11.2.min.js|"></script>
-<script type="text/javascript" th:src="|${#httpServletRequest.getContextPath()}/static/js/angular.min.js|"></script>
-<script type="text/javascript" th:src="|${#httpServletRequest.getContextPath()}/static/js/app.js|"></script>
-<script type="text/javascript" th:src="|${#httpServletRequest.getContextPath()}/static/js/utils.js|"></script>
-<script type="text/javascript" th:src="|${#httpServletRequest.getContextPath()}/static/js/home.js|"></script>
+<th:block th:fragment="script" th:with="p=${#httpServletRequest.getContextPath()}">
+<script type="text/javascript" th:src="|${p}/static/js/jquery-1.11.2.min.js|"></script>
+<script type="text/javascript" th:src="|${p}/static/js/angular.min.js|"></script>
+<script type="text/javascript" th:src="|${p}/static/js/app.js|"></script>
+<script type="text/javascript" th:src="|${p}/static/js/utils.js|"></script>
+<script type="text/javascript" th:src="|${p}/static/js/home.js|"></script>
 </th:block>
 </head>
 <body>

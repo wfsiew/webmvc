@@ -18,8 +18,10 @@
     }
   </script>
   
-  <th:block th:if="${#httpServletRequest.getUserPrincipal() != null and #httpServletRequest.getUserPrincipal().getName() != null}">
-  <h2><span th:text="|Welcome : ${#httpServletRequest.getUserPrincipal().getName()}|" th:remove="tag"></span> | <a href="javascript:formSubmit()"> Logout</a></h2>
+  <div th:with="k=${#httpServletRequest.getUserPrincipal()}" th:remove="tag">
+  <th:block th:if="${k != null and k.getName() != null}">
+  <h2><span th:text="|Welcome : ${k.getName()}|" th:remove="tag"></span> | <a href="javascript:formSubmit()"> Logout</a></h2>
   </th:block>
+  </div>
 </body>
 </html>
