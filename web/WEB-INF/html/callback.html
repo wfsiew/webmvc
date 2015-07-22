@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<img alt="" th:src="${profile.image.url}" />
+<ul>
+  <li th:each="x : profile.emails" th:text="${x}"></li>
+</ul>
+<h1 th:text="${profile.displayName}"></h1>
+</body>
+</html>
