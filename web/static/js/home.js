@@ -20,6 +20,15 @@ function HomeCtrl($scope, $http) {
 			}
 		});
 	}
+	
+	$scope.submit2 = function() {
+		var o = [1,2,3];
+		var cfg = utils.csrfHeader();
+		
+		$http.post('/webmvc/list', o, cfg).success(function(data) {
+			alert(data);
+		});
+	}
 }
 
 app.controller('HomeCtrl', ['$scope', '$http', HomeCtrl]);

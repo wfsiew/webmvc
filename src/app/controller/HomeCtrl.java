@@ -195,6 +195,18 @@ public class HomeCtrl extends AppCtrl
 		return m;
 	}
 	
+	@RequestMapping(value="/list", method=RequestMethod.POST)
+	@ResponseBody
+	public String list(@RequestBody ArrayList<Integer> list) {
+		StringBuffer sb = new StringBuffer();
+		
+		for (Integer x : list) {
+			sb.append("" + x);
+		}
+		
+		return sb.toString();
+	}
+	
 	@RequestMapping("/data")
 	@ResponseBody
 	public Map<String, Object> data()
